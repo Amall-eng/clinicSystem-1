@@ -41,5 +41,8 @@ public class HashTable<K, V> {
         size++; }
     public V get(K key) { throw new UnsupportedOperationException("TODO: HashTable.get"); }
     public V remove(K key) { throw new UnsupportedOperationException("TODO: HashTable.remove"); }
-    public int size() { throw new UnsupportedOperationException("TODO: HashTable.size"); }
+    public int size() {return size;}
+    private int hash(K key) {
+        return Math.abs(key.hashCode()) % table.length;
+    }
 }

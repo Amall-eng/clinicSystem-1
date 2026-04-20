@@ -5,7 +5,7 @@ import java.util.List;
 
 /**
  * MaxHeap starter.
- *ss
+ *
  * Day-1 safety rule:
  * - Constructors must NEVER throw, so the program can start.
  * - Operations may throw UnsupportedOperationException until students implement them;

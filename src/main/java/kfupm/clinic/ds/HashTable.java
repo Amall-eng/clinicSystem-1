@@ -25,7 +25,20 @@ public class HashTable<K, V> {
     public HashTable() { table = (Node<K, V>[]) new Node[initial_size];
         size = 0;}
 
-    public void put(K key, V value) { throw new UnsupportedOperationException("TODO: HashTable.put"); }
+    public void put(K key, V value) {  int index = hash(key);
+
+        Node<K, V> current = table[index];
+
+        while (current != null) {
+            if (current.key.equals(key)) {
+                current.value = value;
+                return;
+            }
+            current = current.next;
+        }
+
+        table[index] = new Node<K, V>(key, value, table[index]);
+        size++; }
     public V get(K key) { throw new UnsupportedOperationException("TODO: HashTable.get"); }
     public V remove(K key) { throw new UnsupportedOperationException("TODO: HashTable.remove"); }
     public int size() { throw new UnsupportedOperationException("TODO: HashTable.size"); }

@@ -40,7 +40,30 @@ public class HashTable<K, V> {
         table[index] = new Node<K, V>(key, value, table[index]);
         size++; }
     public V get(K key) { throw new UnsupportedOperationException("TODO: HashTable.get"); }
-    public V remove(K key) { throw new UnsupportedOperationException("TODO: HashTable.remove"); }
+    public V remove(K key) { public V remove(K key) {
+        int index = hash(key);
+
+        Node<K, V> current = table[index];
+        Node<K, V> prev = null;
+
+        while (current != null) {
+            if (current.key.equals(key)) {
+                if (prev == null) {
+                    table[index] = current.next;
+                } else {
+                    prev.next = current.next;
+                }
+
+                size--;
+                return current.value;
+            }
+
+            prev = current;
+            current = current.next;
+        }
+
+        return null;
+    } }
     public int size() {return size;}
     private int hash(K key) {
         return Math.abs(key.hashCode()) % table.length;

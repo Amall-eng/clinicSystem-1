@@ -39,7 +39,18 @@ public class HashTable<K, V> {
 
         table[index] = new Node<K, V>(key, value, table[index]);
         size++; }
-    public V get(K key) { throw new UnsupportedOperationException("TODO: HashTable.get"); }
+    public V get(K key) {   int index = hash(key);
+
+        Node<K, V> current = table[index];
+
+        while (current != null) {
+            if (current.key.equals(key)) {
+                return current.value;
+            }
+            current = current.next;
+        }
+
+        return null; }
     public V remove(K key) { public V remove(K key) {
         int index = hash(key);
 

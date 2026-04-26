@@ -7,6 +7,7 @@ package kfupm.clinic.ds;
 public class HashTable<K, V> {
 
     private static final int initial_size = 13;
+    private static final double load_factor_limit = 0.75;
 
     private Node<K, V>[] table;
     private int size;
@@ -25,7 +26,11 @@ public class HashTable<K, V> {
     public HashTable() { table = (Node<K, V>[]) new Node[initial_size];
         size = 0;}
 
-    public void put(K key, V value) {  int index = hash(key);
+    public void put(K key, V value) {  if ((size + 1.0) / table.length > load_factor_limit) {
+        resize(table.length * 2 + 1);
+    }
+
+        int index = hash(key);
 
         Node<K, V> current = table[index];
 
@@ -51,7 +56,7 @@ public class HashTable<K, V> {
         }
 
         return null; }
-    public V remove(K key) { public V remove(K key) {
+    public V remove(K key) {
         int index = hash(key);
 
         Node<K, V> current = table[index];
@@ -74,9 +79,24 @@ public class HashTable<K, V> {
         }
 
         return null;
-    } }
+    }
     public int size() {return size;}
     private int hash(K key) {
         return Math.abs(key.hashCode()) % table.length;
+    }
+
+    private void resize(int newSize) {
+        Node<K, V>[] oldTable = table;
+        table = (Node<K, V>[]) new Node[newSize];
+        size = 0;
+
+        for (int i = 0; i < oldTable.length; i++) {
+            Node<K, V> current = oldTable[i];
+
+            while (current != null) {
+                put(current.key, current.value);
+                current = current.next;
+            }
+        }
     }
 }

@@ -45,7 +45,7 @@ public class AVLTree<K extends Comparable<K>, V> {
     public void put(K key, V value) {
         root = put(root, key, value);
     }
-    //Helper method
+    //Helper method:
     private Node put(K key, V value, Node node) {
         if (node == null) {
               return new Node(key, value);

@@ -41,7 +41,24 @@ public class AVLTree<K extends Comparable<K>, V> {
     }
 
     public void put(K key, V value) { throw new UnsupportedOperationException("TODO: AVLTree.put"); }
-    public V get(K key) { throw new UnsupportedOperationException("TODO: AVLTree.get"); }
+
+    // Search for key and return the val
+    public V get(K key) {
+        Node currentNode = root;
+        while (currentNode != null) {
+            if (currentNode.key.compareTo(key) == 0) {
+                return currentNode.value;   //key found
+            }
+            if (currentNode.key.compareTo(key) < 0) {
+                currentNode = currentNode.leftchild; // left subtree(smaller)
+            } else {
+                currentNode = currentNode.rightchild; // right subtree(larger)
+            }
+        }
+        return null;
+    }
+
+
     public void remove(K key) { throw new UnsupportedOperationException("TODO: AVLTree.remove"); }
 
     /** In-order traversal (sorted by key). */
@@ -64,7 +81,16 @@ public class AVLTree<K extends Comparable<K>, V> {
         inOrder(node.rightchild, visitor);
     }
     /** Returns the smallest key/value (leftmost node), or null if empty. */
-    public Entry<K, V> minEntry() { throw new UnsupportedOperationException("TODO: AVLTree.minEntry"); }
+    public Entry<K, V> minEntry() {
+        if (root == null) {
+            return null;
+        }
+        Node cureent = root;
+        while (cureent.leftchild != null) {
+            cureent = cureent.leftchild;    // smallest one
+        }
+        return new Entry<>(cureent.key, cureent.value); // smallest Entry
+    }
 
     public record Entry<K, V>(K key, V value) {}
 }

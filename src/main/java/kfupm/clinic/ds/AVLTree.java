@@ -33,7 +33,7 @@ public class AVLTree<K extends Comparable<K>, V> {
     private Node root ;
 
     // Helper methode to return height of each node
-    private int hight(Node node) {
+    private int height(Node node) {
         if (node == null) {
             return 0;
         }
@@ -45,8 +45,24 @@ public class AVLTree<K extends Comparable<K>, V> {
     public void remove(K key) { throw new UnsupportedOperationException("TODO: AVLTree.remove"); }
 
     /** In-order traversal (sorted by key). */
-    public void inOrder(BiConsumer<K, V> visitor) { throw new UnsupportedOperationException("TODO: AVLTree.inOrder"); }
-
+    // BiConsumer used to apllay operation on (key, value)
+    public void inOrder(BiConsumer<K, V> visitor) {
+        //Start traversal from root
+        inOrder(root, visitor);
+    }
+    //Helper methode to recursively traverse
+    private void inOrder(Node node, BiConsumer<K, V> visitor) {
+        // Noood is empty
+        if (node == null) {
+            return;
+        }
+        // Visit left subtree
+        inOrder(node.leftchild, visitor);
+        // visit node
+        visitor.accept(node.key, node.value);
+        //Visit right subtree
+        inOrder(node.rightchild, visitor);
+    }
     /** Returns the smallest key/value (leftmost node), or null if empty. */
     public Entry<K, V> minEntry() { throw new UnsupportedOperationException("TODO: AVLTree.minEntry"); }
 

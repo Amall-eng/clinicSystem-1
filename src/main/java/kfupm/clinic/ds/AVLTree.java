@@ -40,7 +40,28 @@ public class AVLTree<K extends Comparable<K>, V> {
         return node.h;
     }
 
-    public void put(K key, V value) { throw new UnsupportedOperationException("TODO: AVLTree.put"); }
+
+    //Insert key and val into Tr
+    public void put(K key, V value) {
+        root = put(root, key, value);
+    }
+    //Helper method
+    private Node put(K key, V value, Node node) {
+        if (node == null) {
+              return new Node(key, value);
+        }
+        if(key.compareTo(node.key) < 0){
+            node.leftchild = put(node.leftchild, key, value);
+        }
+        else if (key.compareTo(node.key) > 0) {
+            node.rightchild = put(node.rightchild, key, value);
+        }
+        else{
+            node.value = value;
+            return node;
+        }
+
+    }
 
     // Search for key and return the val
     public V get(K key) {
@@ -49,7 +70,7 @@ public class AVLTree<K extends Comparable<K>, V> {
             if (currentNode.key.compareTo(key) == 0) {
                 return currentNode.value;   //key found
             }
-            if (currentNode.key.compareTo(key) < 0) {
+            if (currentNode.key.compareTo(key) > 0) {
                 currentNode = currentNode.leftchild; // left subtree(smaller)
             } else {
                 currentNode = currentNode.rightchild; // right subtree(larger)

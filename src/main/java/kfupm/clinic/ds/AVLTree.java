@@ -39,6 +39,28 @@ public class AVLTree<K extends Comparable<K>, V> {
         }
         return node.h;
     }
+    // Return balance factor
+    private int getBalance(Node node) {
+        if (node == null) {
+            return 0;
+        }
+
+        return height(node.leftchild) - height(node.rightchild);
+    }
+
+    // Right rotation
+    private Node rotateRight( Node node) {
+
+        Node temp = node.leftchild;
+        Node right = temp.rightchild;
+
+        temp.rightchild = node;
+        node.leftchild = right;
+
+        node.h = 1+ Math.max(height(node.leftchild), height(node.rightchild));
+        temp.h = 1+ Math.max(height(temp.leftchild), height(temp.rightchild));
+        return temp;
+    }
 
 
     //Insert key and val into Tr
@@ -46,7 +68,7 @@ public class AVLTree<K extends Comparable<K>, V> {
         root = put(root, key, value);
     }
     //Helper method:
-    private Node put(K key, V value, Node node) {
+    private Node put(Node node, K key, V value) {
         if (node == null) {
               return new Node(key, value);
         }
@@ -60,7 +82,9 @@ public class AVLTree<K extends Comparable<K>, V> {
             node.value = value;
             return node;
         }
-
+        //Update height
+        node.h = 1 + Math.max(height(node.leftchild), height(node.rightchild));
+        return node;
     }
 
     // Search for key and return the val
@@ -72,16 +96,17 @@ public class AVLTree<K extends Comparable<K>, V> {
             }
             if (currentNode.key.compareTo(key) > 0) {
                 currentNode = currentNode.leftchild; // left subtree(smaller)
-            } else {
+            }
+            else {
                 currentNode = currentNode.rightchild; // right subtree(larger)
             }
         }
         return null;
+
     }
 
 
     public void remove(K key) { throw new UnsupportedOperationException("TODO: AVLTree.remove"); }
-
     /** In-order traversal (sorted by key). */
     // BiConsumer used to apllay operation on (key, value)
     public void inOrder(BiConsumer<K, V> visitor) {

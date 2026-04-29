@@ -95,7 +95,7 @@ public class AVLTree<K extends Comparable<K>, V> {
             node.value = value;
             return node;
         }
-        //Update height
+        //update height
         node.h = 1 + Math.max(height(node.leftchild), height(node.rightchild));
 
         int factorBalance = getBalance(node);

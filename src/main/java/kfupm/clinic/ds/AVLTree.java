@@ -61,7 +61,20 @@ public class AVLTree<K extends Comparable<K>, V> {
         temp.h = 1+ Math.max(height(temp.leftchild), height(temp.rightchild));
         return temp;
     }
+    // Left rotation
+    private Node rotateLeft( Node node) {
 
+        Node temp = node.rightchild;
+        Node left = temp.leftchild;
+
+        temp.leftchild = node;
+        node.rightchild = left;
+
+        node.h = 1+ Math.max(height(node.leftchild), height(node.rightchild));
+        temp.h = 1+ Math.max(height(temp.leftchild), height(temp.rightchild));
+
+        return temp;
+    }
 
     //Insert key and val into Tr
     public void put(K key, V value) {

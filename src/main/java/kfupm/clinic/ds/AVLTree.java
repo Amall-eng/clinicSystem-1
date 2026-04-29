@@ -97,6 +97,30 @@ public class AVLTree<K extends Comparable<K>, V> {
         }
         //Update height
         node.h = 1 + Math.max(height(node.leftchild), height(node.rightchild));
+
+        int factorBalance = getBalance(node);
+
+        //LL
+        if (factorBalance > 1 && key.compareTo(node.leftchild.key) < 0) {
+            return rotateRight(node);
+        }
+
+        //RR
+        if (factorBalance < -1 && key.compareTo(node.rightchild.key) > 0) {
+            return rotateLeft(node);
+        }
+
+        //LR
+        if (factorBalance > 1 && key.compareTo(node.leftchild.key) > 0) {
+            node.leftchild = rotateLeft(node.leftchild);
+            return rotateRight(node);
+        }
+
+        //RL
+        if(factorBalance < -1 && key.compareTo(node.rightchild.key) < 0) {
+            node.rightchild = rotateRight(node.rightchild);
+            return rotateLeft(node);
+        }
         return node;
     }
 

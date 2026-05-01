@@ -143,7 +143,73 @@ public class AVLTree<K extends Comparable<K>, V> {
     }
 
 
-    public void remove(K key) { throw new UnsupportedOperationException("TODO: AVLTree.remove"); }
+    public void remove(K key) {
+        root = remove(root, key);
+    }
+    //Helper method
+    private Node remove(Node node, K key) {
+        if (node == null) {
+            return null;
+        }
+        if (key.compareTo(node.key) < 0) {
+            node.leftchild = remove(node.leftchild, key);
+        }
+        else if (key.compareTo(node.key) > 0) {
+            node.rightchild = remove(node.rightchild, key);
+        }
+        else {
+            if (node.leftchild == null ) {
+                return node.rightchild;
+            }
+            if (node.rightchild == null ) {
+                return node.leftchild;
+            }
+            // if node has two children
+            Node smallest = findMin(node.rightchild);
+            node.key = smallest.key;
+            node.value = smallest.value;
+            node.rightchild = remove(node.rightchild, smallest.key);
+        }
+        //update hight
+        node.h = 1 + Math.max(height(node.leftchild), height(node.rightchild));
+
+        int factorBalance = getBalance(node);
+
+        // LL
+        if (factorBalance > 1 && getBalance(node.leftchild) >= 0) {
+            return rotateRight(node);
+        }
+
+        // LR
+        if (factorBalance > 1 && getBalance(node.leftchild) < 0) {
+            node.leftchild = rotateLeft(node.leftchild);
+            return rotateRight(node);
+        }
+
+        // RR
+        if (factorBalance < -1 && getBalance(node.rightchild) <= 0) {
+            return rotateLeft(node);
+        }
+
+        // RL
+        if (factorBalance < -1 && getBalance(node.rightchild) > 0) {
+            node.rightchild = rotateRight(node.rightchild);
+            return rotateLeft(node);
+        }
+        return node;
+    }
+
+    //Helper methode 2
+    private Node findMin(Node node) {
+        if (node.leftchild != null) {
+            return findMin(node.leftchild);
+        }
+        return node;
+        //while (node.leftchild != null) {
+        //    node = node.leftchild;
+        //}
+        //return node;
+    }
     /** In-order traversal (sorted by key). */
     // BiConsumer used to apllay operation on (key, value)
     public void inOrder(BiConsumer<K, V> visitor) {
@@ -175,5 +241,5 @@ public class AVLTree<K extends Comparable<K>, V> {
         return new Entry<>(cureent.key, cureent.value); // smallest Entry
     }
 
-    public record Entry<K, V>(K key, V value) {}
+    public re طيب cord Entry<K, V>(K key, V value) {}
 }

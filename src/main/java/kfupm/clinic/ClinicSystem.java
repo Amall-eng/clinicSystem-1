@@ -10,6 +10,7 @@ import kfupm.clinic.parser.CommandTokenizer;
 import kfupm.clinic.service.ClinicService;
 import kfupm.clinic.service.ClinicServiceImpl;
 
+
 public class ClinicSystem {
     public static void main(String[] args) throws Exception {
         ClinicService service = new ClinicServiceImpl();

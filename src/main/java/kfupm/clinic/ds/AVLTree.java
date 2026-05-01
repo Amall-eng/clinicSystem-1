@@ -241,5 +241,5 @@ public class AVLTree<K extends Comparable<K>, V> {
         return new Entry<>(cureent.key, cureent.value); // smallest Entry
     }
 
-    public re طيب cord Entry<K, V>(K key, V value) {}
+    public record Entry<K, V>(K key, V value) {}
 }

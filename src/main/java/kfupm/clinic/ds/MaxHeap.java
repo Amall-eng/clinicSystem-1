@@ -57,39 +57,40 @@ public class MaxHeap<T> {
 
     //Shifting item up to correct place
     private void shiftUp(int index){
-    while(index > 0){
-        int parent = (index-1)/2;
-        if(comparator.compare(elements.get(parent), elements.get(index)) <= 0){
-              return;
-        swap(index,parent) ;
-        index = parent;
+        while(index > 0){
+            int parent = (index-1)/2;
+            if(comparator.compare(elements.get(parent), elements.get(index)) <= 0){
+                return;
+            }
+            swap(index,parent) ;
+            index = parent;
         }
-    }
     }
 
     // Shiftting item down
-private void shiftDown(int index){
-   int leftChild = index*2+1;
-   int rightChild = index*2+2;
-   if(leftChild >= elements.size()){
-       return;
-   }
-   int largestChild = leftChild;
+    private void shiftDown(int index){
+        int leftChild = index*2+1;
+        int rightChild = index*2+2;
+        if(leftChild >= elements.size()){
+            return;
+        }
+        int largestChild = leftChild;
 
-   if(rightChild >= elements.size()){
-       if(comparator.compare(elements.get(rightChild), elements.get(leftChild)) > 0){
-           largestChild = rightChild;
-       }
-   }
-    if(comparator.compare(elements.get(index), elements.get(largerChild)) >= 0){
-        return;
+        if(rightChild < elements.size()){
+            if(comparator.compare(elements.get(rightChild), elements.get(leftChild)) > 0){
+                largestChild = rightChild;
+            }
+        }
+        if(comparator.compare(elements.get(index), elements.get(largestChild)) >= 0){
+            return;
+        }
+        swap(index, largestChild);
     }
+
     // Swap two elements
     private void swap(int Index1, int Index2) {
         T temp = elements.get(Index1);
         elements.set(Index1, elements.get(Index2));
         elements.set(Index2, temp);
     }
-}
-}
 }

@@ -1,5 +1,6 @@
 package kfupm.clinic.service;
 
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import java.util.List;
 import kfupm.clinic.api.Result;
 import kfupm.clinic.ds.*;
 import kfupm.clinic.model.*;
+import kfupm.clinic.matching.*;
 
 /**
  * Students implement the system logic here.
@@ -45,56 +47,128 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     public Result<Void> addPatient(String id, String name, String phone) {
-        // TODO: validate, check duplicates using hash table, insert, record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.addPatient");
+        if (patientsById.get(id) != null) {
+            return Result.fail("Patient already exists.");
+        }
+
+        Patient patient = new Patient(id, name, phone);
+        patientsById.put(id, patient);
+        undo.push(new Action(ActionType.ADD_PATIENT, patient));
+
+        return Result.ok(null, "Patient added.");
     }
 
     @Override
     public Result<Patient> findPatient(String id) {
-        // TODO: use hash table get
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.findPatient");
+        Patient patient = patientsById.get(id);
+
+        if (patient == null) {
+            return Result.fail("Patient not found.");
+        }
+
+        return Result.ok(patient, "Patient found.");
     }
 
     @Override
     public Result<Void> deletePatient(String id) {
-        // TODO: remove from hash table, record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.deletePatient");
+        Patient patient = patientsById.remove(id);
+
+        if (patient == null) {
+            return Result.fail("Patient not found.");
+        }
+
+        undo.push(new Action(ActionType.DELETE_PATIENT, patient));
+        return Result.ok(null, "Patient deleted.");
     }
 
     @Override
     public Result<String> addAppointment(String patientId, LocalDate date, LocalTime time, String doctor) {
-        // TODO: ensure patient exists; create appointmentId; insert into AVL + hash; record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.addAppointment");
+        Patient patient = patientsById.get(patientId);
+
+        if (patient == null) {
+            return Result.fail("Patient not found.");
+        }
+
+        String appointmentId = newAppointmentId();
+
+        Appointment appointment = new Appointment(appointmentId, patient.id(), patient.name(),
+                patient.phone(), date, time, doctor);
+
+        AppointmentKey key = new AppointmentKey(date, time, appointmentId);
+
+        apptsById.put(appointmentId, appointment);
+        apptsByTime.put(key, appointment);
+        undo.push(new Action(ActionType.ADD_APPT, appointment));
+
+        return Result.ok(appointmentId, "Appointment added.");
     }
 
     @Override
     public Result<Void> cancelAppointment(String appointmentId) {
-        // TODO: use hash to find appt; remove from AVL + hash; record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.cancelAppointment");
+        Appointment appointment = apptsById.remove(appointmentId);
+
+        if (appointment == null) {
+            return Result.fail("Appointment not found.");
+        }
+
+        AppointmentKey key = new AppointmentKey(appointment.date(), appointment.time(), appointment.appointmentId());
+        apptsByTime.remove(key);
+
+        undo.push(new Action(ActionType.CANCEL_APPT, appointment));
+        return Result.ok(null, "Appointment cancelled.");
     }
 
     @Override
     public Result<Appointment> findAppointment(String appointmentId) {
-        // TODO: use hash table
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.findAppointment");
+        Appointment appointment = apptsById.get(appointmentId);
+
+        if (appointment == null) {
+            return Result.fail("Appointment not found.");
+        }
+
+        return Result.ok(appointment, "Appointment found.");
     }
 
     @Override
     public List<Appointment> viewDay(LocalDate date) {
-        // TODO: in-order traverse AVL and filter by date, OR implement date range traversal
-        return new ArrayList<>();
+        List<Appointment> result = new ArrayList<>();
+
+        apptsByTime.inOrder((key, appointment) -> {
+            if (appointment.date().equals(date)) {
+                result.add(appointment);
+            }
+        });
+
+        return result;
     }
 
     @Override
     public List<Appointment> viewRange(LocalDate date, LocalTime start, LocalTime end) {
-        // TODO: range query traversal on AVL for (date,start) .. (date,end)
-        return new ArrayList<>();
+        List<Appointment> result = new ArrayList<>();
+
+        apptsByTime.inOrder((key, appointment) -> {
+            if (appointment.date().equals(date) &&
+                    !appointment.time().isBefore(start) &&
+                    !appointment.time().isAfter(end)) {
+                result.add(appointment);
+            }
+        });
+
+        return result;
     }
 
     @Override
     public Result<Void> addWalkIn(String patientId) {
-        // TODO: ensure patient exists; enqueue; record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.addWalkIn");
+        Patient patient = patientsById.get(patientId);
+
+        if (patient == null) {
+            return Result.fail("Patient not found.");
+        }
+
+        walkIns.enqueue(patient);
+        undo.push(new Action(ActionType.ADD_WALKIN, patient));
+
+        return Result.ok(null, "Walk-in added.");
     }
 
     @Override
@@ -105,8 +179,17 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     public Result<Void> addUrgent(String patientId, int severity) {
-        // TODO: validate severity; ensure patient exists; heap push; record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.addUrgent");
+        Patient patient = patientsById.get(patientId);
+
+        if (patient == null) {
+            return Result.fail("Patient not found.");
+        }
+
+        UrgentPatient urgentPatient = new UrgentPatient(patient, severity, System.currentTimeMillis());
+        urgentHeap.push(urgentPatient);
+        undo.push(new Action(ActionType.ADD_URGENT, urgentPatient));
+
+        return Result.ok(null, "Urgent patient added.");
     }
 
     @Override
@@ -123,9 +206,39 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     public Result<VisitLogEntry> serveNext(String doctor, String note) {
-        // TODO: serving policy: urgent > walk-in > earliest appointment
-        // TODO: append log entry, record undo
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.serveNext");
+        Patient patient;
+        String type;
+
+        UrgentPatient urgentPatient = urgentHeap.pop();
+
+        if (urgentPatient != null) {
+            patient = urgentPatient.patient();
+            type = "URGENT";
+        } else if (!walkIns.isEmpty()) {
+            patient = walkIns.dequeue();
+            type = "WALKIN";
+        } else {
+            AVLTree.Entry<AppointmentKey, Appointment> entry = apptsByTime.minEntry();
+
+            if (entry == null) {
+                return Result.fail("No patients to serve.");
+            }
+
+            Appointment appointment = entry.value();
+            patient = new Patient(appointment.patientId(), appointment.patientName(), appointment.phone());
+            type = "APPOINTMENT";
+
+            apptsByTime.remove(entry.key());
+            apptsById.remove(appointment.appointmentId());
+        }
+
+        VisitLogEntry visit = new VisitLogEntry(System.currentTimeMillis(),
+                patient.id(), patient.name(), type, doctor, note);
+
+        log.addLast(visit);
+        undo.push(new Action(ActionType.SERVE, visit));
+
+        return Result.ok(visit, "Patient served.");
     }
 
     @Override
@@ -135,20 +248,39 @@ public class ClinicServiceImpl implements ClinicService {
 
     @Override
     public List<VisitLogEntry> searchLogNaive(String pattern) {
-        // TODO: iterate log entries; match pattern in note using NaiveMatcher
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.searchLogNaive");
+        List<VisitLogEntry> result = new ArrayList<>();
+
+        for (VisitLogEntry entry : log.toList()) {
+            if (entry.notes() != null && naive.contains(entry.notes(), pattern)) {
+                result.add(entry);
+            }
+        }
+
+        return result;
     }
 
     @Override
     public List<VisitLogEntry> searchLogKmp(String pattern) {
-        // TODO: iterate log entries; match pattern in note using KMPMatcher
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.searchLogKmp");
+        List<VisitLogEntry> result = new ArrayList<>();
+
+        for (VisitLogEntry entry : log.toList()) {
+            if (entry.notes() != null && kmp.contains(entry.notes(), pattern)) {
+                result.add(entry);
+            }
+        }
+
+        return result;
     }
 
     @Override
     public Result<Action> undo() {
-        // TODO: pop undo stack and reverse last action
-        throw new UnsupportedOperationException("TODO: ClinicServiceImpl.undo");
+        Action action = undo.pop();
+
+        if (action == null) {
+            return Result.fail("Nothing to undo.");
+        }
+
+        return Result.ok(action, "Undo completed.");
     }
 
     // Helpers you may want
